@@ -1,6 +1,6 @@
 version: "3.9"
 services:
   server:
-    build: .
+    build: build/server.Dockerfile
     ports:
       - "3003:3003"
