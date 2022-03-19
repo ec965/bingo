@@ -21,7 +21,7 @@ func main() {
 
 	http.Handle("/", recoveryR)
 
-	addr := "127.0.0.1:3003"
+	addr := "0.0.0.0:3003"
 
 	server := &http.Server{
 		Handler:      recoveryR,
