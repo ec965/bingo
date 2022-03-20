@@ -1,12 +1,17 @@
 # Bingo
 
+## Tools
+
+- docker / docker-compose
+- golang-migrate
+
 ## Data
 
 **Users**
 
 | field    | type   | note   |
 | -------- | ------ | ------ |
-| id       | int    | serial |
+| user_id  | int    | serial |
 | username | string |        |
 | password | string |        |
 
@@ -14,31 +19,32 @@
 
 | field     | type | note                                                 |
 | --------- | ---- | ---------------------------------------------------- |
-| id        | int  | serial                                               |
+| game_id   | int  | serial                                               |
 | dimension | int  | boards are squares, we only need 1 dimensional value |
 
 **Card**
 
 | field   | type   | note       |
 | ------- | ------ | ---------- |
-| id      | int    | serial     |
+| card_id | int    | serial     |
 | game_id | int    | fk -> game |
 | text    | string |            |
 
 **Board**
 
-| field   | type | note       |
-| ------- | ---- | ---------- |
-| id      | int  | serial     |
-| user_id | int  | fk -> user |
+| field    | type | note       |
+| -------- | ---- | ---------- |
+| board_id | int  | serial     |
+| user_id  | int  | fk -> user |
+| game_id  | int  | fk -> game |
 
-**Card Board Junction**
+**Tile**
 
-A board is made of many cards.
+A board is made of many tiles. Each tile has a card on top of it.
 
 | field    | type    | note                                           |
 | -------- | ------- | ---------------------------------------------- |
-| id       | int     | serial                                         |
+| tile_id  | int     | serial                                         |
 | board_id | int     | fk -> board                                    |
 | card_id  | int     | fk -> card                                     |
 | row      | int     | row index of the card on the board's matrix    |
