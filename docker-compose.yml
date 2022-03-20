@@ -1,28 +1,12 @@
 version: "3.9"
 services:
-  server:
-    image: cosmtrek/air
-    working_dir: /app
-    ports:
-      - "3003:3003"
-    volumes:
-      - ./:/app:z # on linux, we have to give docker file permissions
-    depends_on:
-      - db
-    networks:
-      - backend
   db:
     image: postgres:alpine3.15
     ports:
       - "5432:5432"
-    networks:
-      - backend
     volumes:
       - ~/data:/var/lib/postgresql
     environment:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-networks:
-  backend:
-    name: backend

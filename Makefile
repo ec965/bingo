@@ -3,7 +3,7 @@ pg_url = postgresql://postgres:postgres@localhost:5432/bingo
 server:
 	go build -o server cmd/server/main.go
 
-.PHONY: dev fmt db migrate-up migrate-down
+.PHONY: dev fmt db migrate-up migrate-down tmux
 
 dev:
 	go run cmd/server/main.go
@@ -19,3 +19,6 @@ migrate-up:
 
 migrate-down:
 	migrate -database $(pg_url)?sslmode=disable -path db/migrations down
+
+tmux:
+	./scripts/tmux.sh
