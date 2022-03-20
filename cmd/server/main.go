@@ -14,10 +14,12 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-// TODO: move this to env or something
-const dbURL = "postgresql://postgres:postgres@localhost:5432/bingo"
-
 func main() {
+	dbURL, found := os.LookupEnv("DATABASE_URL")
+	if !found {
+		dbURL = "postgresql://postgres:postgres@localhost:5432/bingo"
+	}
+
 	conn, err := pgx.Connect(context.Background(), dbURL)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
