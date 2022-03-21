@@ -19,6 +19,12 @@ type Game struct {
 	Dimension int    `json:"dimension"`
 }
 
+// TODO: split this up into 2 functions
+// when a user creates a game:
+// 1. create the game
+// 2. subsequent api calls will add cards to the game
+// WARN: you already deleted the migrations to remove deferment for FKs
+// create a game with associated cards
 func CreateGame(
 	ctx context.Context,
 	dbConn *pgx.Conn,
@@ -73,5 +79,11 @@ func CreateGame(
 	}
 
 	game.Cards = cardArr
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, err
+
+	}
 	return &game, nil
 }
