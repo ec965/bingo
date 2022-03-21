@@ -70,11 +70,14 @@ func CreateUser(
 		panic(err)
 	}
 
-	sql, _, _ := dialect.
+	sql, _, err := dialect.
 		Insert("users").
 		Rows(goqu.Record{"username": username, "password": passwordHash}).
 		Returning("user_id", "username").
 		ToSQL()
+	if err != nil {
+		panic(err)
+	}
 
 	user := User{}
 	err = dbConn.QueryRow(ctx, sql).Scan(&user.UserId, &user.Username)
@@ -90,14 +93,17 @@ func FindUserById(
 	dbConn *pgx.Conn,
 	userId int,
 ) (*User, error) {
-	sql, _, _ := dialect.
+	sql, _, err := dialect.
 		From("users").
 		Select("user_id", "username").
 		Where(goqu.Ex{"user_id": userId}).
 		ToSQL()
+	if err != nil {
+		panic(err)
+	}
 
 	user := User{}
-	err := dbConn.QueryRow(ctx, sql).Scan(&user.UserId, &user.Username)
+	err = dbConn.QueryRow(ctx, sql).Scan(&user.UserId, &user.Username)
 	if err != nil {
 		return nil, err
 	}
