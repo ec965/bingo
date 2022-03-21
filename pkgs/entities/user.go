@@ -2,6 +2,7 @@ package entities
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/doug-martin/goqu/v9"
 	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
@@ -18,7 +19,7 @@ type User struct {
 // find an existing user
 // the password will be checked
 // returns pgx.ErrNoRows if the user isn't found
-func FindUser(
+func FindUserByCredentials(
 	ctx context.Context,
 	dbConn *pgx.Conn,
 	username string,
@@ -31,14 +32,15 @@ func FindUser(
 		Where(goqu.Ex{"username": username}).
 		ToSQL()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	// query db
 	user := User{}
 	passwordHash := ""
+	fmt.Println(sql, args)
 	err = dbConn.
-		QueryRow(ctx, sql, args).
+		QueryRow(ctx, sql, args...).
 		Scan(&user.UserId, &user.Username, &passwordHash)
 	if err != nil {
 		return nil, err
@@ -47,7 +49,7 @@ func FindUser(
 	// check password
 	err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password))
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	return &user, nil
@@ -64,26 +66,40 @@ func CreateUser(
 	// I don't really care how complex the password is right now
 	// hash the password
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	sql, _, err := dialect.
+	sql, _, _ := dialect.
 		Insert("users").
 		Rows(goqu.Record{"username": username, "password": passwordHash}).
 		Returning("user_id", "username").
 		ToSQL()
-	if err != nil {
-		return nil, err
-	}
 
 	user := User{}
 	err = dbConn.QueryRow(ctx, sql).Scan(&user.UserId, &user.Username)
-
 	if err != nil {
 		return nil, err
 	}
 
+	return &user, nil
+}
+
+func FindUserById(
+	ctx context.Context,
+	dbConn *pgx.Conn,
+	userId int,
+) (*User, error) {
+	sql, _, _ := dialect.
+		From("users").
+		Select("user_id", "username").
+		Where(goqu.Ex{"user_id": userId}).
+		ToSQL()
+
+	user := User{}
+	err := dbConn.QueryRow(ctx, sql).Scan(&user.UserId, &user.Username)
+	if err != nil {
+		return nil, err
+	}
 	return &user, nil
 }

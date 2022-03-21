@@ -1,21 +1,30 @@
 package api
 
 import (
-	"encoding/json"
-	"net/http"
 	"reflect"
 	"strings"
+	"time"
 
+	"github.com/ec965/bingo/pkgs/token"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt"
 	"github.com/jackc/pgx/v4"
 )
 
 var (
-	validate *validator.Validate
-	dbConn   *pgx.Conn
+	validate     *validator.Validate
+	dbConn       *pgx.Conn
+	tokenManager *token.TokenManager
 )
 
 func init() {
+	tokenManager = &token.TokenManager{
+		Secret: []byte("very_secret"), // FIXME: uhhh not very secret lol
+		StandardClaims: &jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 24 * 7).Unix(), // 1 week
+		},
+	}
+
 	validate = validator.New()
 	// get the json encoded name on error
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
@@ -33,18 +42,4 @@ func init() {
 // start function to connect to the database
 func DbConnect(conn *pgx.Conn) {
 	dbConn = conn
-}
-
-// example handler
-func ApiHandler(w http.ResponseWriter, r *http.Request) {
-	m := make(map[string]string)
-	j, err := json.Marshal(m)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(j)
 }

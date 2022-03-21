@@ -31,9 +31,7 @@ func main() {
 	api.DbConnect(conn)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/api", api.ApiHandler)
-	r.HandleFunc("/api/user", api.UserCreateHandler).
-		Methods("POST")
+	r = api.CreateRoutes(r)
 
 	var router http.Handler = r
 	router = handlers.ContentTypeHandler(router, "application/json")

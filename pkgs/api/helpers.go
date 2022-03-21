@@ -22,7 +22,7 @@ func decodeJson[T any](body io.Reader) (payload *T, err error) {
 
 // validates json request body struct
 // returns an error message if not ok
-func validateJson[T any](payload *T) (ok bool, msg []byte, err error) {
+func validatePayload[T any](payload *T) (ok bool, msg []byte, err error) {
 	// validate
 	err = validate.Struct(payload)
 	if err != nil {
@@ -38,4 +38,11 @@ func validateJson[T any](payload *T) (ok bool, msg []byte, err error) {
 		return false, j, err
 	}
 	return true, make([]byte, 0), nil
+}
+
+// creates an "{error: errMsg}" json byte array
+func createErrorJson(errMsg string) ([]byte, error) {
+	m := make(map[string]string)
+	m["error"] = errMsg
+	return json.Marshal(m)
 }
