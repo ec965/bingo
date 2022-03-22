@@ -29,7 +29,7 @@ resource "heroku_build" "bingo" {
   app_id = heroku_app.bingo.id
 
   source {
-    path = "../"
+    path = "../app"
   }
 }
 
@@ -37,7 +37,7 @@ resource "heroku_formation" "bingo" {
   app_id     = heroku_app.bingo.id
   type       = "web"
   quantity   = 1
-  size       = "Standard-1x"
+  size       = "hobby"
   depends_on = [heroku_build.bingo]
 }
 

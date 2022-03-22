@@ -3,7 +3,7 @@ WORKDIR /app
 COPY go.mod ./
 COPY go.sum ./
 COPY pkgs ./pkgs
-COPY cmd/server/main.go ./
+COPY main.go ./
 RUN go build main.go
 
 FROM alpine:3.14.4
