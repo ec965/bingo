@@ -15,23 +15,22 @@ type createGamePayload struct {
 	Dimension int    `json:"dimension" validate:"required"`
 }
 
-func CreateGameHandler(w http.ResponseWriter, r *http.Request) {
+func CreateGameHandler(w http.ResponseWriter, r *http.Request, user *entities.User) {
 	payload, err := decodeJson[createGamePayload](r.Body)
 	if err != nil {
-		response.JsonDecodeError(w, err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	ok, msg, err := validatePayload(payload)
 	if !ok {
-		response.ValidationError(w, msg)
+		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
 
-	// TODO: get the user id from the token that should come with every request
-	userId := 1
-
-	game, err := entities.CreateGame(context.TODO(), dbConn, payload.Name, payload.Dimension, userId)
+	game, err := entities.CreateGame(
+		context.TODO(), dbConn, payload.Name, payload.Dimension, user.UserId,
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -39,31 +38,20 @@ func CreateGameHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	response.Standard(w, j)
+	response.Json(w, j, http.StatusOK)
 }
 
 func FindGameHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	if !query.Has("id") {
-		j, err := CreateErrorJson("id is required")
-		if err != nil {
-			panic(err)
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(j)
+		http.Error(w, "id is required", http.StatusBadRequest)
 		return
 	}
 
 	gameId, err := strconv.Atoi(query.Get("id"))
 	if err != nil {
-		j, err := CreateErrorJson("id must be an integer")
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(j)
-			return
-		}
+		http.Error(w, "id must be an integer", http.StatusBadRequest)
+		return
 	}
 
 	game, err := entities.FindGame(context.TODO(), dbConn, gameId)
@@ -75,5 +63,5 @@ func FindGameHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	response.Standard(w, j)
+	response.Json(w, j, http.StatusOK)
 }

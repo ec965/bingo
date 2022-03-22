@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/ec965/bingo/pkgs/entities"
+	"github.com/ec965/bingo/pkgs/response"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4"
@@ -22,9 +23,7 @@ type credentialsPayload struct {
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	payload, err := decodeJson[credentialsPayload](r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Header().Set("Content-Type", "application/text")
-		w.Write([]byte(err.Error()))
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -33,9 +32,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	if !ok {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(msg)
+		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -47,12 +44,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		if errors.As(err, &pgErr) {
 			// username is not unique
 			if pgErr.Code == pgerrcode.UniqueViolation {
-				m := make(map[string]string)
-				m["error"] = "username already exists"
-				j, _ := json.Marshal(m)
-				w.WriteHeader(http.StatusBadRequest)
-				w.Header().Set("Content-Type", "application/json")
-				w.Write(j)
+				http.Error(w, "username already exists", http.StatusBadRequest)
 				return
 			}
 		}
@@ -61,9 +53,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	j := createAuthPayload(tokenManager.CreateToken(user), user)
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(j)
+	response.Json(w, j, http.StatusOK)
 }
 
 // handle user singin with password and username
@@ -80,8 +70,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	if !ok {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(msg)
+		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
 
@@ -91,12 +80,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			j, err := CreateErrorJson("user does not exist")
-			if err != nil {
-				panic(err)
-			}
-			w.WriteHeader(http.StatusNotFound)
-			w.Write(j)
+			http.Error(w, "user does not exist", http.StatusNotFound)
 			return
 		}
 		// some other unexpected pg error
@@ -104,9 +88,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	j := createAuthPayload(tokenManager.CreateToken(user), user)
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(j)
+	response.Json(w, j, http.StatusOK)
 }
 
 // create auth json with token and user json

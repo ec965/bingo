@@ -1,10 +1,13 @@
 package api
 
 import (
+	"net/http"
 	"reflect"
 	"strings"
 	"time"
 
+	"github.com/ec965/bingo/pkgs/entities"
+	"github.com/ec965/bingo/pkgs/middleware"
 	"github.com/ec965/bingo/pkgs/token"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt"
@@ -15,15 +18,18 @@ var (
 	validate     *validator.Validate
 	dbConn       *pgx.Conn
 	tokenManager *token.TokenManager
+	secret       []byte
+	authRoute    func(func(http.ResponseWriter, *http.Request, *entities.User)) http.HandlerFunc
 )
 
 func init() {
 	tokenManager = &token.TokenManager{
-		Secret: []byte("very_secret"), // FIXME: uhhh not very secret lol
+		Secret: secret,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24 * 7).Unix(), // 1 week
 		},
 	}
+	authRoute = middleware.AuthUser(tokenManager)
 
 	validate = validator.New()
 	// get the json encoded name on error
@@ -40,6 +46,7 @@ func init() {
 }
 
 // start function to connect to the database
-func DbConnect(conn *pgx.Conn) {
+func Start(conn *pgx.Conn, tokenSecret []byte) {
 	dbConn = conn
+	secret = tokenSecret
 }

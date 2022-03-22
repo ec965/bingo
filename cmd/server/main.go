@@ -17,6 +17,7 @@ import (
 
 func main() {
 	dbURL := secrets.FromEnv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/bingo")
+	tokenSecret := secrets.FromEnv("SECRET", "very_secret")
 
 	conn, err := pgx.Connect(context.Background(), dbURL)
 	if err != nil {
@@ -26,7 +27,7 @@ func main() {
 	defer conn.Close(context.Background())
 
 	// pass db connection to api handlers
-	api.DbConnect(conn)
+	api.Start(conn, []byte(tokenSecret))
 
 	r := mux.NewRouter()
 	r = api.CreateRoutes(r)
