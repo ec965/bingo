@@ -17,10 +17,12 @@
 
 **Game**
 
-| field     | type | note                                                 |
-| --------- | ---- | ---------------------------------------------------- |
-| game_id   | int  | serial                                               |
-| dimension | int  | boards are squares, we only need 1 dimensional value |
+| field     | type   | note                                                 |
+| --------- | ------ | ---------------------------------------------------- |
+| game_id   | int    | serial                                               |
+| name      | string | name of the game                                     |
+| dimension | int    | boards are squares, we only need 1 dimensional value |
+| user_id   | int    | user that created the game                           |
 
 **Card**
 

@@ -11,7 +11,8 @@ import (
 )
 
 type createGamePayload struct {
-	Dimension int `json:"dimension"`
+	Name      string `json:"name" validate:"required,max=50"`
+	Dimension int    `json:"dimension" validate:"required"`
 }
 
 func CreateGameHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +28,10 @@ func CreateGameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	game, err := entities.CreateGame(context.TODO(), dbConn, payload.Dimension)
+	// TODO: get the user id from the token that should come with every request
+	userId := 1
+
+	game, err := entities.CreateGame(context.TODO(), dbConn, payload.Name, payload.Dimension, userId)
 	if err != nil {
 		panic(err)
 	}

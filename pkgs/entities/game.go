@@ -19,8 +19,10 @@ type Card struct {
 
 type Game struct {
 	GameId    int    `json:"game_id"`
+	Name      string `json:"name"`
 	Cards     []Card `json:"cards"`
 	Dimension int    `json:"dimension"`
+	UserId    int    `json:"user_id"`
 }
 
 // create cards for a game
@@ -63,12 +65,14 @@ func CreateCards(
 func CreateGame(
 	ctx context.Context,
 	dbConn *pgx.Conn,
+	name string,
 	dimension int,
+	userId int,
 ) (*Game, error) {
 	// insert game
 	sql, args, err := dialect.Insert("games").
-		Rows(goqu.Record{"dimension": dimension}).
-		Returning("game_id", "dimension").
+		Rows(goqu.Record{"dimension": dimension, "user_id": userId, "name": name}).
+		Returning("game_id", "name", "user_id", "dimension").
 		ToSQL()
 	if err != nil {
 		panic(err)
@@ -76,7 +80,7 @@ func CreateGame(
 	// we want to send back an empty array
 	cardArr := []Card{}
 	game := Game{Cards: cardArr}
-	err = dbConn.QueryRow(ctx, sql, args...).Scan(&game.GameId, &game.Dimension)
+	err = dbConn.QueryRow(ctx, sql, args...).Scan(&game.GameId, &game.Name, &game.UserId, &game.Dimension)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +104,7 @@ func FindGame(
 	for rows.Next() {
 		var cardId *int
 		var cardText *string
-		err := rows.Scan(&game.GameId, &game.Dimension, &cardId, &cardText)
+		err := rows.Scan(&game.GameId, &game.Dimension, &game.Name, &game.UserId, &cardId, &cardText)
 		card := Card{}
 		if cardId != nil && cardText != nil {
 			card.Text = *cardText
@@ -120,7 +124,13 @@ func FindGame(
 func getFindGameSql(gameId int) (string, []interface{}) {
 	sql, args, err := dialect.
 		From("games").
-		Select("games.game_id", "games.dimension", "cards.card_id", "cards.text").
+		Select(
+			"games.game_id",
+			"games.dimension",
+			"games.name",
+			"games.user_id",
+			"cards.card_id",
+			"cards.text").
 		Where(goqu.Ex{"games.game_id": gameId}).
 		LeftJoin(
 			goqu.T("cards"),
