@@ -9,16 +9,14 @@ import (
 	"time"
 
 	"github.com/ec965/bingo/pkgs/api"
+	"github.com/ec965/bingo/pkgs/secrets"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4"
 )
 
 func main() {
-	dbURL, found := os.LookupEnv("DATABASE_URL")
-	if !found {
-		dbURL = "postgresql://postgres:postgres@localhost:5432/bingo"
-	}
+	dbURL := secrets.FromEnv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/bingo")
 
 	conn, err := pgx.Connect(context.Background(), dbURL)
 	if err != nil {

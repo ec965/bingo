@@ -41,7 +41,7 @@ func validatePayload[T any](payload *T) (ok bool, msg []byte, err error) {
 }
 
 // creates an "{error: errMsg}" json byte array
-func createErrorJson(errMsg string) ([]byte, error) {
+func CreateErrorJson(errMsg string) ([]byte, error) {
 	m := make(map[string]string)
 	m["error"] = errMsg
 	return json.Marshal(m)

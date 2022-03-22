@@ -40,7 +40,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := entities.CreateUser(
-		context.Background(), dbConn, payload.Username, payload.Password,
+		context.TODO(), dbConn, payload.Username, payload.Password,
 	)
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -86,12 +86,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := entities.FindUserByCredentials(
-		context.Background(), dbConn, payload.Username, payload.Password,
+		context.TODO(), dbConn, payload.Username, payload.Password,
 	)
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			j, err := createErrorJson("user does not exist")
+			j, err := CreateErrorJson("user does not exist")
 			if err != nil {
 				panic(err)
 			}
