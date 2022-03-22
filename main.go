@@ -18,6 +18,7 @@ import (
 func main() {
 	dbURL := secrets.FromEnv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/bingo")
 	tokenSecret := secrets.FromEnv("SECRET", "very_secret")
+	port := secrets.FromEnv("PORT", "8080")
 
 	conn, err := pgx.Connect(context.Background(), dbURL)
 	if err != nil {
@@ -42,7 +43,7 @@ func main() {
 
 	server := &http.Server{
 		Handler:      router,
-		Addr:         "0.0.0.0:8080",
+		Addr:         "0.0.0.0:" + port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}

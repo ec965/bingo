@@ -1,13 +1,13 @@
 pg_fallback = postgresql://postgres:postgres@localhost:5432/bingo
 
 server:
-	go build -o server cmd/server/main.go
+	go build -o tmp/server .
 
 .PHONY: dev fmt vet db migrate-up migrate-down tmux
 
 # code
 dev:
-	go run cmd/server/main.go
+	go run .
 
 fmt:
 	gofmt -s -w .
