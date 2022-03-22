@@ -37,16 +37,3 @@ func TestDecodeJson(t *testing.T) {
 		)
 	}
 }
-
-func TestCreateJsonError(t *testing.T) {
-	errMsg := "there was an error"
-	j, err := CreateErrorJson(errMsg)
-
-	if err != nil {
-		t.Fatalf("Failed to create json: %v", err)
-	}
-	errJson := "{\"error\":\"" + errMsg + "\"}"
-	if string(j) != errJson {
-		t.Fatalf("Failed to create error message, expected %s but got %s", errJson, string(j))
-	}
-}

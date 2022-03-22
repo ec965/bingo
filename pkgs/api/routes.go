@@ -17,10 +17,12 @@ func CreateRoutes(r *mux.Router) *mux.Router {
 		Methods("POST").
 		HeadersRegexp("Content-Type", "application/json")
 
+	// /api/game
 	game := api.PathPrefix("/game").Subrouter()
 	game.HandleFunc("", authRoute(CreateGameHandler)).
 		Methods("POST").
 		HeadersRegexp("Content-Type", "application/json")
+	// /api/game
 	game.HandleFunc("", FindGameHandler).
 		Methods("GET")
 

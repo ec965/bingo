@@ -27,12 +27,9 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ok, msg, err := validatePayload(payload)
+	err = validatePayload(payload)
 	if err != nil {
-		panic(err)
-	}
-	if !ok {
-		http.Error(w, msg, http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -65,12 +62,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ok, msg, err := validatePayload(payload)
+	err = validatePayload(payload)
 	if err != nil {
-		panic(err)
-	}
-	if !ok {
-		http.Error(w, msg, http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

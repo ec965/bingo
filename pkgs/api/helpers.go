@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 
@@ -22,16 +23,16 @@ func decodeJson[T any](body io.Reader) (payload *T, err error) {
 
 // validates json request body struct
 // returns an error message if not ok
-func validatePayload[T any](payload *T) (ok bool, msg string, err error) {
+func validatePayload[T any](payload *T) error {
 	// validate
-	err = validate.Struct(payload)
+	err := validate.Struct(payload)
 	if err != nil {
 		// generate error message
-		msg = ""
+		msg := ""
 		for _, err := range err.(validator.ValidationErrors) {
 			msg += fmt.Sprintf("%s:%s,%s;", err.Field(), err.Tag(), err.Type())
 		}
-		return false, msg, err
+		return errors.New(msg)
 	}
-	return true, "", nil
+	return nil
 }

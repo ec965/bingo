@@ -22,9 +22,8 @@ func CreateGameHandler(w http.ResponseWriter, r *http.Request, user *entities.Us
 		return
 	}
 
-	ok, msg, err := validatePayload(payload)
-	if !ok {
-		http.Error(w, msg, http.StatusBadRequest)
+	if err = validatePayload(payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
